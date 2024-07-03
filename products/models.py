@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Category(models.Model):
-    parent = models.ForeignKey('self', verbose_name='parent', blank=True, null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', verbose_name=_('parent'), blank=True, null=True, on_delete=models.CASCADE)
     title = models.CharField(_('title'), max_length=50)
     description = models.CharField(_('description'), blank=True, max_length=500)
     avatar = models.ImageField(_('avatar'), blank=True, upload_to='categories/')
@@ -39,8 +39,20 @@ class Product(models.Model):
 
 
 class File(models.Model):
-    parent = models.ForeignKey('Product', verbose_name='product', blank=True, related_name='files', null=True, on_delete=models.CASCADE)
+    FILE_AUDIO = 1
+    FILE_VIDEO = 2
+    FILE_PDF = 3
+    FILE_TYPES = (
+        (FILE_AUDIO, _('audio')),
+        (FILE_VIDEO, _('video')),
+        (FILE_PDF, _('pdf')),
+    )
+
+    product = models.ForeignKey(
+        'Product', verbose_name=_('product'), blank=True, related_name='files',
+        null=True, on_delete=models.CASCADE)
     title = models.CharField(_('title'), max_length=50)
+    file_type = models.PositiveSmallIntegerField(_('file type'), choices=FILE_TYPES)
     file = models.FileField(_('file'), upload_to='files/%Y/%m/%d/')
     is_enable = models.BooleanField(_('is_enable'), default=True)
     created_time = models.DateTimeField(_('created_time'), auto_now_add=True)
@@ -50,3 +62,6 @@ class File(models.Model):
         db_table = 'files'
         verbose_name = _('file')
         verbose_name_plural = _('files')
+
+    def __str__(self):
+        return self.title
